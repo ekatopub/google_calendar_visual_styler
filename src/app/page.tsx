@@ -1,3 +1,4 @@
+// State to control which calendar is shown
 
 "use client";
 import "react-day-picker/dist/style.css";
@@ -6,6 +7,9 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { DateRange, DayPicker, Modifiers, CalendarDay } from "react-day-picker";
 import "./react-day-picker-darkfix.css";
+
+
+
 
 type CalendarEvent = {
   id: string;
@@ -29,19 +33,57 @@ export default function Home() {
 
 
 function CalendarPage() {
+  const [showMiniCalendar, setShowMiniCalendar] = useState(true);
+  // ...existing code...
   const { data: session, status } = useSession();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState<DateRange | undefined>();
+
+  // イベントを日付ごとにグループ化
+  const eventsByDate = events.reduce<Record<string, CalendarEvent[]>>((acc, event) => {
+    // 日付を取得（dateTime優先、なければdate）
+    const dateStr = event.start.dateTime
+      ? format(new Date(event.start.dateTime), 'yyyy-MM-dd')
+      : event.start.date
+        ? event.start.date
+        : '';
+    if (!dateStr) return acc;
+    if (!acc[dateStr]) acc[dateStr] = [];
+    acc[dateStr].push(event);
+    return acc;
+  }, {});
 
   // 例: 土日をハイライトするmodifiers
   const modifiers = {
     weekend: (date: Date) => date.getDay() === 0 || date.getDay() === 6,
   };
 
-  // 週末を赤色で表示するためのスタイル
+  // 週末を赤色で表示し、イベントも表示するカスタムDay
   const modifiersStyles = {
     weekend: { color: 'red' },
+  };
+
+  // カレンダー2: 日セルにイベントタイトルを表示
+  const renderDayWithEvents = (props: { day: CalendarDay; modifiers: Modifiers } & React.HTMLAttributes<HTMLDivElement>) => {
+    const { day } = props;
+    if (!(day instanceof Date) || isNaN(day.getTime())) {
+      return <></>;
+    }
+    const dateStr = format(day, 'yyyy-MM-dd');
+    const dayEvents = eventsByDate[dateStr] || [];
+    return (
+      <>
+        <span>{day.getDate()}</span>
+        {dayEvents.length > 0 && (
+          <span style={{ display: 'block', fontSize: '0.7em', color: '#1976d2', marginTop: 2 }}>
+            {dayEvents.map(ev => (
+              <span key={ev.id}>{ev.summary}<br /></span>
+            ))}
+          </span>
+        )}
+      </>
+    );
   };
 
   useEffect(() => {
@@ -82,23 +124,56 @@ function CalendarPage() {
         <h1 className="text-2xl font-bold">Googleカレンダー予定一覧</h1>
         <button onClick={() => signOut()} className="text-sm text-blue-500 dark:text-blue-300">ログアウト</button>
       </div>
-      <div className="mb-6">
-        <p>取得する開始日と終了日を選択してください</p>
-        <DayPicker
-          mode="range"
-          selected={range}
-          onSelect={setRange}
-          showOutsideDays
-          className="bg-white dark:bg-zinc-800 rounded shadow p-4 text-black dark:text-white"
-          modifiers={modifiers}
-          modifiersStyles={modifiersStyles}
-        />
-        <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-          {range?.from && range?.to
-            ? `${format(range.from, "yyyy/MM/dd")} ～ ${format(range.to, "yyyy/MM/dd")}`
-            : "期間を選択してください"}
+      {/* Calendar 1: Mini DayPicker for range selection */}
+      {showMiniCalendar && (
+        <div className="mb-6">
+          <p>取得する開始日と終了日を選択してください</p>
+          <DayPicker
+            mode="range"
+            selected={range}
+            onSelect={setRange}
+            showOutsideDays
+            className="bg-white dark:bg-zinc-800 rounded shadow p-2 text-black dark:text-white w-64 mx-auto"
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
+          />
+          <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+            {range?.from && range?.to
+              ? `${format(range.from, "yyyy/MM/dd")} ～ ${format(range.to, "yyyy/MM/dd")}`
+              : "期間を選択してください"}
+          </div>
+          {(events && events.length > 0) && (
+            <button
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+              onClick={() => setShowMiniCalendar(false)}
+            >
+              予定を見る
+            </button>
+          )}
         </div>
-      </div>
+      )}
+      {/* Calendar 2: Large calendar with event overlays */}
+      {!showMiniCalendar && (events && events.length > 0) && (
+        <div className="mb-6">
+          <p className="text-lg font-semibold mb-2">選択した期間の予定</p>
+          <DayPicker
+            mode="range"
+            selected={range}
+            onSelect={setRange}
+            showOutsideDays
+            className="bg-white dark:bg-zinc-800 rounded shadow-lg p-8 text-black dark:text-white w-full max-w-2xl mx-auto text-base"
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
+            components={{ Day: renderDayWithEvents }}
+          />
+          <button
+            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded"
+            onClick={() => setShowMiniCalendar(true)}
+          >
+            日付を再選択する
+          </button>
+        </div>
+      )}
       {loading ? (
         <div>予定を取得中...</div>
       ) : (
