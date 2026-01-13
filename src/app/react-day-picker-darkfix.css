@@ -1,0 +1,61 @@
+/* --- 強制的にCSS変数でreact-day-pickerの色を上書き --- */
+/* 通常モード */
+:root {
+	--rdp-accent-color: #2563eb;
+	--rdp-background-color: #fff;
+	--rdp-outline: 2px solid #2563eb;
+}
+/* ダークモードでDayPickerのルートにだけ白矢印を強制 */
+.dark .rdp-root {
+	--rdp-accent-color: #fff !important;
+	--rdp-background-color: #22232a !important;
+	--rdp-outline: 2px solid #fff !important;
+	--rdp-range-middle-background-color: #444654 !important;
+}
+.dark .rdp-nav_button {
+	color: #fff !important;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+.dark .rdp-nav_button svg {
+	fill: #fff !important;
+}
+.dark .rdp-nav_button:focus,
+.dark .rdp-nav_button:hover {
+	color: #fff !important;
+	background: #27272a !important;
+}
+.dark .rdp-nav_button:focus svg,
+.dark .rdp-nav_button:hover svg {
+	fill: #fff !important;
+}
+.dark .rdp-day_range_middle {
+	background: rgba(36, 37, 42, 0.05) !important;
+	background-color: rgba(36, 37, 42, 0.05) !important;
+	color: #fff !important;
+	border-radius: 0 !important;
+	border: none !important;
+	box-shadow: 0 0 0 100vw rgba(36, 37, 42, 0.05) inset !important;
+	opacity: 1 !important;
+}
+.dark .rdp-day_range_middle::before,
+.dark .rdp-day_range_middle::after {
+	background: rgba(36, 37, 42, 0.05) !important;
+	background-color: rgba(36, 37, 42, 0.05) !important;
+	box-shadow: 0 0 0 100vw rgba(36, 37, 42, 0.05) inset !important;
+	opacity: 1 !important;
+}
+.dark .rdp-day_range_start,
+.dark .rdp-day_range_end {
+	background-color: #2563eb !important;
+	color: #fff !important;
+	border-radius: 50% !important;
+	border: 2px solid #fff !important;
+	box-shadow: none !important;
+	opacity: 1 !important;
+}
+.dark .rdp-day {
+	box-shadow: none !important;
+	border: none !important;
+}

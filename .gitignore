@@ -12,6 +12,10 @@
 
 # testing
 /coverage
+auth-info.txt
+idea.txt
+client_secret_591752029724-rnv1k0vvpoojd8lvsahnkssj9uhgpqiu.apps.googleusercontent.com.json
+
 
 # next.js
 /.next/
@@ -23,6 +27,7 @@
 # misc
 .DS_Store
 *.pem
+/src-keep/
 
 # debug
 npm-debug.log*
