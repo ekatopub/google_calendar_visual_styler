@@ -1,7 +1,6 @@
 // State to control which calendar is shown
 
 "use client";
-import "react-day-picker/dist/style.css";
 import { useSession, signIn, signOut, SessionProvider } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
@@ -12,7 +11,6 @@ import dynamic from "next/dynamic";
 const CalendarView = dynamic(() => import("./components/CalendarView"), { ssr: false });
 // import { DateRange, DayPicker, CalendarDay, Matcher } from "react-day-picker";
 // import { MiniCalendar } from "./components/MiniCalendar";
-import "./react-day-picker-darkfix.css";
 
 type CalendarEvent = {
   id: string;
@@ -21,6 +19,7 @@ type CalendarEvent = {
   location?: string;
   start: { dateTime?: string; date?: string };
   end: { dateTime?: string; date?: string };
+  colorId?: string;
 };
 
 
@@ -76,20 +75,42 @@ function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black p-8 text-black dark:text-white">
+    <div className="min-h-screen bg-zinc-50 p-8 text-black">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Googleカレンダー予定一覧</h1>
-        <button onClick={() => signOut()} className="text-sm text-blue-500 dark:text-blue-300">ログアウト</button>
+        <button onClick={() => signOut()} className="text-sm text-blue-500">ログアウト</button>
       </div>
       {/* 大きなカレンダーのみ表示 */}
       <div className="my-12">
         <CalendarView
-          events={events.map(ev => ({
-            title: ev.summary || "(タイトルなし)",
-            start: ev.start.dateTime ? new Date(ev.start.dateTime) : ev.start.date ? new Date(ev.start.date) : new Date(),
-            end: ev.end.dateTime ? new Date(ev.end.dateTime) : ev.end.date ? new Date(ev.end.date) : new Date(),
-            allDay: Boolean(ev.start.date && !ev.start.dateTime),
-          }))}
+          events={events.map(ev => {
+            const isAllDay = Boolean(ev.start.date && !ev.start.dateTime);
+            const start = ev.start.dateTime
+              ? new Date(ev.start.dateTime)
+              : ev.start.date
+                ? new Date(ev.start.date)
+                : new Date();
+            let end;
+            if (ev.end.dateTime) {
+              end = new Date(ev.end.dateTime);
+            } else if (ev.end.date) {
+              // 終日イベントはGoogle API仕様でend.dateが翌日になるので1日引く
+              const endDate = new Date(ev.end.date);
+              if (isAllDay) {
+                endDate.setDate(endDate.getDate() - 1);
+              }
+              end = endDate;
+            } else {
+              end = new Date();
+            }
+            return {
+              title: ev.summary || "(タイトルなし)",
+              start,
+              end,
+              allDay: isAllDay,
+              colorId: ev.colorId,
+            };
+          })}
           onRangeChange={setRange}
         />
         {loading && <div className="mt-4 text-center text-blue-500">予定を取得中...</div>}

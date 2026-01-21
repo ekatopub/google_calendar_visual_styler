@@ -26,6 +26,7 @@ export type BigCalendarEvent = {
   start: Date;
   end: Date;
   allDay?: boolean;
+  colorId?: string;
 };
 
 type CalendarViewProps = {
@@ -58,6 +59,35 @@ const CalendarView: React.FC<CalendarViewProps> = ({ events, onRangeChange }) =>
       onRangeChange({ start, end });
     }
   };
+  // Google Calendar colorId to color map (default 11 colors)
+  const colorMap: Record<string, string> = {
+    '1': '#a4bdfc', // Blue
+    '2': '#7ae7bf', // Green
+    '3': '#dbadff', // Purple
+    '4': '#ffb3b3', // Light Red
+    '5': '#fbd75b', // Yellow
+    '6': '#ffb878', // Orange
+    '7': '#46d6db', // Turquoise
+    '8': '#e1e1e1', // Gray
+    '9': '#5484ed', // Dark blue
+    '10': '#51b749', // Dark green
+    '11': '#ffb3b3', // Light Red (was dark red)
+  };
+
+  // react-big-calendar eventPropGetter
+  const eventPropGetter = (event: BigCalendarEvent) => {
+    const backgroundColor = event.colorId && colorMap[event.colorId] ? colorMap[event.colorId] : '#a4c8f0';
+    return {
+      style: {
+        backgroundColor,
+        color: '#000', // 黒文字
+        borderRadius: '4px',
+        border: 'none',
+        opacity: 0.95,
+      },
+    };
+  };
+
   return (
     <div style={{ height: 500 }}>
       <Calendar<BigCalendarEvent>
@@ -69,6 +99,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ events, onRangeChange }) =>
         style={{ height: '100%' }}
         culture="ja"
         onRangeChange={handleRangeChange}
+        eventPropGetter={eventPropGetter}
       />
     </div>
   );
