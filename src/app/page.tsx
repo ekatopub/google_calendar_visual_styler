@@ -8,9 +8,9 @@ import { format } from "date-fns";
 import dynamic from "next/dynamic";
 
 // 大きなカレンダー（react-big-calendar）
-import type { BigCalendarEvent } from "./components/CalendarView";
+// import type { BigCalendarEvent } from "./components/CalendarView"; // 未使用のため削除
 const CalendarView = dynamic(() => import("./components/CalendarView"), { ssr: false });
-import { DateRange, DayPicker, Modifiers, CalendarDay } from "react-day-picker";
+import { DateRange, DayPicker, CalendarDay, Matcher } from "react-day-picker";
 import { MiniCalendar } from "./components/MiniCalendar";
 import "./react-day-picker-darkfix.css";
 
@@ -23,6 +23,8 @@ type CalendarEvent = {
   end: { dateTime?: string; date?: string };
 };
 
+
+// Home: wraps CalendarPage in SessionProvider
 export default function Home() {
   return (
     <SessionProvider>
@@ -31,11 +33,12 @@ export default function Home() {
   );
 }
 
+// All hooks and logic must be inside a component
 function CalendarPage() {
   const [showMiniCalendar, setShowMiniCalendar] = useState(true);
   const { data: session, status } = useSession();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false); // Unused, so removed
   const [range, setRange] = useState<DateRange | undefined>();
 
   // APIからのeventsが配列でない場合に備えて防御
@@ -55,7 +58,7 @@ function CalendarPage() {
   }, {});
 
   // minicalender:土日をハイライトするmodifiers
-  const modifiers = {
+  const modifiers: Record<string, Matcher | Matcher[] | undefined> = {
     weekend: (date: Date) => date.getDay() === 0 || date.getDay() === 6,
   };
 
@@ -65,7 +68,7 @@ function CalendarPage() {
   };
 
   // ？calender: 日セルにイベントタイトルを表示
-  const renderDayWithEvents = (props: { day: CalendarDay; modifiers: Modifiers } & React.HTMLAttributes<HTMLDivElement>) => {
+  const renderDayWithEvents = (props: { day: CalendarDay; modifiers: Record<string, Matcher | Matcher[] | undefined> } & React.HTMLAttributes<HTMLDivElement>) => {
     const { day } = props;
     if (!(day instanceof Date) || isNaN(day.getTime())) {
       return <></>;
@@ -91,14 +94,14 @@ function CalendarPage() {
   useEffect(() => {
     if (shouldFetchEvents && status === "authenticated" && range?.from && range?.to) {
       const fetchEvents = async () => {
-        setLoading(true);
+        // setLoading(true); // loading is unused
         const start = format(range.from!, "yyyy-MM-dd'T'00:00:00XXX");
         const end = format(range.to!, "yyyy-MM-dd'T'23:59:59XXX");
         const res = await fetch(`/api/calendar?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`);
         const data = await res.json();
         console.log("[DEBUG] Fetched events:", data);
         setEvents(Array.isArray(data) ? data : []);
-        setLoading(false);
+        // setLoading(false); // loading is unused
         setShouldFetchEvents(false); // 取得後はリセット
       };
       fetchEvents();
@@ -121,7 +124,6 @@ function CalendarPage() {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-8 text-black dark:text-white">
       <div className="flex justify-between items-center mb-8">
@@ -140,7 +142,6 @@ function CalendarPage() {
             setShowMiniCalendar(false);
             setShouldFetchEvents(true);
           }}
-          events={events}
         />
       )}
 

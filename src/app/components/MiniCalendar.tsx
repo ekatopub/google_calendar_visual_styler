@@ -1,16 +1,29 @@
-import { DateRange, DayPicker, Modifiers, CalendarDay } from "react-day-picker";
+
+import { DateRange, DayPicker, CalendarDay, Matcher } from "react-day-picker";
 import { format } from "date-fns";
 import React from "react";
+
+// Duplicate the CalendarEvent type here to avoid import issues from app directory
+type CalendarEvent = {
+  id: string;
+  summary?: string;
+  description?: string;
+  location?: string;
+  start: { dateTime?: string; date?: string };
+  end: { dateTime?: string; date?: string };
+};
+
+
 
 export type MiniCalendarProps = {
   range: DateRange | undefined;
   setRange: (range: DateRange | undefined) => void;
-  eventsByDate: Record<string, any[]>;
-  modifiers: Modifiers;
+  eventsByDate: Record<string, CalendarEvent[]>;
+  modifiers: Record<string, Matcher | Matcher[] | undefined>;
   modifiersStyles: Record<string, React.CSSProperties>;
   onShowEvents: () => void;
-  events: any[];
 };
+
 
 export const MiniCalendar: React.FC<MiniCalendarProps> = ({
   range,
@@ -19,30 +32,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
   modifiers,
   modifiersStyles,
   onShowEvents,
-  events,
 }) => {
-  // 日セルにイベントタイトルを表示
-  const renderDayWithEvents = (props: { day: CalendarDay; modifiers: Modifiers } & React.HTMLAttributes<HTMLDivElement>) => {
-    const { day } = props;
-    if (!(day instanceof Date) || isNaN(day.getTime())) {
-      return <></>;
-    }
-    const dateStr = format(day, 'yyyy-MM-dd');
-    const dayEvents = eventsByDate[dateStr] || [];
-    return (
-      <>
-        <span>{day.getDate()}</span>
-        {dayEvents.length > 0 && (
-          <span style={{ display: 'block', fontSize: '0.7em', color: '#1976d2', marginTop: 2 }}>
-            {dayEvents.map((ev: any) => (
-              <span key={ev.id}>{ev.summary}<br /></span>
-            ))}
-          </span>
-        )}
-      </>
-    );
-  };
-
   return (
     <div className="mb-6">
       <p>取得する開始日と終了日を選択してください</p>
