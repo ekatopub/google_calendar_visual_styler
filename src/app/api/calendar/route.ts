@@ -29,14 +29,26 @@ export async function GET(request: Request) {
 			singleEvents: true,
 			orderBy: "startTime",
 		});
+
+		// 生データ（展開済み）をサーバーログに出力
+		console.log(
+			"Google Calendar API response (data):\n" +
+				JSON.stringify(events.data, null, 2)
+		);
+
 		return new Response(JSON.stringify(events.data.items), { status: 200 });
 	} catch (e) {
 		let errorMessage = "Failed to fetch events";
 		if (e instanceof Error) {
 			errorMessage = e.message;
 		}
-		return new Response(JSON.stringify({ error: errorMessage, details: e }), {
-			status: 500,
-		});
+		// エラー詳細をサーバーログに出力
+		console.error("[Google Calendar API ERROR]", e);
+		return new Response(
+			JSON.stringify({ error: errorMessage, details: String(e) }),
+			{
+				status: 500,
+			}
+		);
 	}
 }
