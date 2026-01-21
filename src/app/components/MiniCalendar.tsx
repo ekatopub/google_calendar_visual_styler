@@ -1,5 +1,5 @@
 
-import { DateRange, DayPicker, CalendarDay, Matcher } from "react-day-picker";
+import { DateRange, DayPicker, Matcher } from "react-day-picker";
 import { format } from "date-fns";
 import React from "react";
 
@@ -28,7 +28,7 @@ export type MiniCalendarProps = {
 export const MiniCalendar: React.FC<MiniCalendarProps> = ({
   range,
   setRange,
-  eventsByDate,
+  //eventsByDate,
   modifiers,
   modifiersStyles,
   onShowEvents,

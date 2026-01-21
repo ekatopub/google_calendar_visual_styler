@@ -14,7 +14,7 @@ const locales = {
 const localizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }),
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }), // 月曜始まり
   getDay,
   locales,
 });
@@ -64,14 +64,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({ events, onRangeChange }) =>
     '1': '#a4bdfc', // Blue
     '2': '#7ae7bf', // Green
     '3': '#dbadff', // Purple
-    '4': '#ffb3b3', // Light Red
+    '4': '#ff9999', // Slightly deeper red
     '5': '#fbd75b', // Yellow
-    '6': '#ffb878', // Orange
+    '6': '#ffd1a6', // Lighter Orange
     '7': '#46d6db', // Turquoise
     '8': '#e1e1e1', // Gray
     '9': '#5484ed', // Dark blue
     '10': '#51b749', // Dark green
-    '11': '#ffb3b3', // Light Red (was dark red)
+    '11': '#ff9999', // Slightly deeper red
   };
 
   // react-big-calendar eventPropGetter
